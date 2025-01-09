@@ -1,0 +1,8 @@
+import pandas as pd
+
+df = pd.read_excel("/Test - input-applicant.xlsx", sheet_name=0)
+#print(df)
+user_counts = df['userId'].value_counts().reset_index()
+user_counts.columns = ['userId', 'login_count']
+user_counts_sorted = user_counts.sort_values(by='userId', ascending=True)
+print(user_counts_sorted)
