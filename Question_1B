@@ -1,0 +1,7 @@
+SELECT transactions.date, 
+       transactions.total, 
+       transactions.userId,
+       Name.name
+FROM transactions
+LEFT JOIN UserName ON transactions.userId = UserName.A
+LEFT JOIN Name ON UserName.B = Name.id
