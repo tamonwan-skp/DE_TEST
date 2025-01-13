@@ -1,0 +1,42 @@
+import pandas as pd
+
+# อ่านข้อมูลจาก Excel
+df = pd.read_excel("/Test - input-applicant.xlsx", sheet_name=0)
+
+# ฟังก์ชันแปลงปี พ.ศ. เป็น ค.ศ.
+def convert_to_gregorian(year_buddhist):
+    return year_buddhist - 543
+
+# แปลงวันที่จาก พ.ศ. เป็น ค.ศ. และแปลงเป็น datetime
+def convert_to_datetime(date_str):
+    try:
+        # แยกวัน/เดือน/ปี (ปี พ.ศ.)
+        date_parts = date_str.split(' ')[0].split('/')
+        time_part = date_str.split(' ')[1]
+        
+        day = int(date_parts[1])
+        month = int(date_parts[0])
+        year_buddhist = int(date_parts[2])
+        
+        # แปลงปี พ.ศ. เป็น ค.ศ.
+        year_gregorian = convert_to_gregorian(year_buddhist)
+        
+        # รวมเป็น datetime string และแปลงเป็น datetime
+        date_time_str = f"{year_gregorian}-{day:02d}-{month:02d} {time_part}"
+        return pd.to_datetime(date_time_str, format='%Y-%d-%m %H:%M:%S')
+    except Exception as e:
+        print(f"Error processing date: {date_str} - {e}")
+        return pd.NaT
+
+# ใช้ฟังก์ชันในการแปลงคอลัมน์ 'date'
+df['date'] = df['date'].apply(convert_to_datetime)
+
+# หาวันที่ล่าสุดที่ user เข้ามาใช้งาน
+last_login = df.groupby('userId')['date'].max().reset_index()
+#print(last_login)
+
+# คำนวณจำนวนวันที่ผ่านมาจากวันที่ล่าสุด
+last_login['days_since_last_login'] = (pd.to_datetime('today') - last_login['date']).dt.days
+
+# แสดงผลลัพธ์
+print(last_login[['userId', 'days_since_last_login']])
